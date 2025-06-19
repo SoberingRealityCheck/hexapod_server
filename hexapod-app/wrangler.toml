@@ -1,0 +1,4 @@
+name = "hexapod",
+
+"compatibility_date": "2025-06-19",
+"main": "src/index.ts"
