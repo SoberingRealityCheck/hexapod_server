@@ -1,12 +1,7 @@
-name = "hexapod"
-
-compatibility_date = "2025-06-19"
-main = "src/app/page.tsx"
-
-[observability.logs]
-enabled = false
-
-compatibility_flags = [ "nodejs_compat" ]
-
-
-
+  main = ".open-next/worker.js"
+  name = "my-app"
+  compatibility_date = "2025-03-25"
+  compatibility_flags = ["nodejs_compat"]
+  [assets]
+  directory = ".open-next/assets"
+  binding = "ASSETS"
