@@ -2,3 +2,11 @@ name = "hexapod"
 
 compatibility_date = "2025-06-19"
 main = "src/app/page.tsx"
+
+[observability.logs]
+enabled = false
+
+compatibility_flags = [ "nodejs_compat" ]
+
+
+
