@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { theme } from '@/styles/theme';
+import 'leaflet/dist/leaflet.css';
 
 // Only load Leaflet on the client side
 let L: any;
@@ -12,12 +14,25 @@ if (typeof window !== 'undefined') {
   L.Icon.Default.imagePath = '/';
   L.Icon.Default.prototype.options.iconUrl = '/marker-icon.png';
   L.Icon.Default.prototype.options.shadowUrl = '/marker-shadow.png';
-
-  // Load Leaflet CSS
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-  document.head.appendChild(link);
+} else {
+  // Provide a mock implementation for server-side rendering
+  L = {
+    map: () => ({
+      setView: () => {},
+      addLayer: () => {},
+      remove: () => {}
+    }),
+    tileLayer: () => ({
+      addTo: () => {}
+    }),
+    marker: () => ({
+      addTo: () => {},
+      bindPopup: () => {}
+    }),
+    circle: () => ({
+      addTo: () => {}
+    })
+  };
 }
 
 interface Props {
@@ -40,12 +55,13 @@ export default function LeafletMap({ latitude, longitude }: Props) {
       const leafletMap = L.map(mapRef.current, {
         zoomControl: false,
         scrollWheelZoom: false,
-        attributionControl: false
-      }).setView([20.7247, -156.3311], 8);
+        attributionControl: false,
+        center: [20.7247, -156.3311],
+        zoom: 8
+      });
 
       // Add tile layer from OpenStreetMap
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
         attribution: '© OpenStreetMap contributors'
       }).addTo(leafletMap);
 
@@ -83,7 +99,7 @@ export default function LeafletMap({ latitude, longitude }: Props) {
   return (
     <div 
       ref={mapRef} 
-      className="h-full w-full"
+      className={`${theme.borderRadius} ${theme.border} ${theme.surface} h-full w-full`}
       style={{
         position: 'relative',
         overflow: 'hidden'

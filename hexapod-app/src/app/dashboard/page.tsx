@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import Image from 'next/image';
+import { theme } from '@/styles/theme';
 import { RobotState } from '@/lib/robot-state';
 import CameraFeed from '@/components/CameraFeed';
 import BatteryIndicator from '@/components/BatteryIndicator';
 import GPSMap from '@/components/GPSMap';
 import StatusIndicator from '@/components/StatusIndicator';
 import MessageLog from '@/components/MessageLog';
-import { theme } from '@/styles/theme';
+
 
 export default function Dashboard() {
   const [robotState, setRobotState] = useState<RobotState>({
@@ -39,19 +41,21 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <header className="border-b border-gray-800">
+      <header className={`${theme.border} ${theme.borderSecondary}`}>
         <div className="flex items-center p-4">
           <button 
-            className="text-gray-400 hover:text-gray-300 transition-colors"
+            className={`${theme.textSecondary} ${theme.accentHover} ${theme.transition}`}
             onClick={() => window.location.href = '/'}
           >
             ← Back to Home
           </button>
           <div className="flex-1 flex items-center justify-center gap-2">
-            <img 
+            <Image 
               src="/hexapod-logo.svg" 
               alt="Hexapod Logo" 
-              className="w-8 h-8 fill-gray-100 stroke-gray-100"
+              width={32} 
+              height={32} 
+              style={{ fill: 'gray-100', stroke: 'gray-100' }}
             />
             <h1 className="text-3xl font-bold text-gray-100">Hexapod Monitoring Dashboard</h1>
           </div>

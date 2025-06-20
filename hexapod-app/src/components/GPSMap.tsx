@@ -16,6 +16,9 @@ let LeafletMap: any;
 
 if (typeof window !== 'undefined') {
   LeafletMap = require('./LeafletMap').default;
+} else {
+  // Mock implementation for server-side rendering
+  LeafletMap = () => null;
 }
 
 export default function GPSMap({ location, className }: Props) {
@@ -43,7 +46,7 @@ export default function GPSMap({ location, className }: Props) {
 
   if (!isClient) {
     return (
-      <div className={`h-64 ${theme.borderRadius} ${theme.surface} ${className || ''}`}>
+      <div className={`h-64 rounded-lg bg-gray-800 ${className || ''}`}>
         <div className="h-full"></div>
       </div>
     );
@@ -51,7 +54,7 @@ export default function GPSMap({ location, className }: Props) {
 
   return (
     <div className={`relative ${className || ''}`}>
-      <div className={`${theme.borderRadius} ${theme.surface}`}>
+      <div className="rounded-lg bg-gray-800">
         <div className="h-64">
           <LeafletMap 
             latitude={latestLocation.latitude} 

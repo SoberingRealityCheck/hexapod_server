@@ -42,12 +42,27 @@ export default function CameraFeed({ streamUrl, className, onError }: CameraFeed
     const video = videoRef.current;
     if (video && streamUrl) {
       video.src = streamUrl;
-      video.play().catch((error) => {
+      video.controls = true;
+      video.autoplay = true;
+      video.loop = false;
+      
+      video.addEventListener('error', (event) => {
         setError('Failed to play camera feed');
         if (onError) {
-          onError(error);
+          onError(event.error);
         }
       });
+
+      video.addEventListener('loadeddata', () => {
+        setIsLoading(false);
+        setError(null);
+      });
+
+      // Clean up
+      return () => {
+        video.src = '';
+        video.removeAttribute('controls');
+      };
     }
   }, [streamUrl, onError]);
 
