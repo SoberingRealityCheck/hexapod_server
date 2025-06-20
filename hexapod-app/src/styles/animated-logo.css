@@ -1,0 +1,14 @@
+@keyframes infinite-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.animate-infinite {
+  animation: infinite-scroll 2s linear infinite;
+  animation-timing-function: linear;
+  height: 200px; /* 2 logos * 100px height */
+}

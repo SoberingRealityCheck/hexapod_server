@@ -1,24 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { theme } from '@/styles/theme';
+import LeafletMap from './LeafletMap.client';
+
+import { Location } from '@/types';
 
 interface Props {
-  location: {
-    latitude: number;
-    longitude: number;
-  };
+  location: Location;
   className?: string;
-}
-
-// Only load LeafletMap on the client side
-let LeafletMap: any;
-
-if (typeof window !== 'undefined') {
-  LeafletMap = require('./LeafletMap').default;
-} else {
-  // Mock implementation for server-side rendering
-  LeafletMap = () => null;
 }
 
 export default function GPSMap({ location, className }: Props) {
@@ -57,18 +46,15 @@ export default function GPSMap({ location, className }: Props) {
       <div className="rounded-lg bg-gray-800">
         <div className="h-64">
           <LeafletMap 
-            latitude={latestLocation.latitude} 
-            longitude={latestLocation.longitude}
+            location={{ latitude: latestLocation.latitude, longitude: latestLocation.longitude }} 
           />
-          {!latestLocation.latitude && !latestLocation.longitude ? (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-              <div className="text-white font-semibold">
-                <p className="text-lg">No GPS signal</p>
-                <p className="text-sm">Showing default position (Hawaii)</p>
-              </div>
-            </div>
-          ) : null}
         </div>
+        {!latestLocation.latitude && !latestLocation.longitude ? (
+          <div className="mt-2 px-4 py-2 bg-gray-700 rounded-b-lg text-white font-semibold">
+            <p className="text-lg">No GPS signal</p>
+            <p className="text-sm">Showing default position (Hawaii)</p>
+          </div>
+        ) : null}
       </div>
     </div>
   );

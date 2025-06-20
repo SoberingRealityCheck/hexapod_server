@@ -35,12 +35,14 @@ if (typeof window !== 'undefined') {
   };
 }
 
+import { Location } from '@/types';
+
 interface Props {
-  latitude: number;
-  longitude: number;
+  location: Location;
 }
 
-export default function LeafletMap({ latitude, longitude }: Props) {
+export default function LeafletMap({ location }: Props) {
+  const { latitude, longitude } = location;
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

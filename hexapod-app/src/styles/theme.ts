@@ -7,12 +7,12 @@ export function useTheme() {
 export const theme = {
   // Next.js minimal dark theme
   background: 'bg-black',
-  surface: 'bg-gray-800',
-  surfaceSecondary: 'bg-gray-700',
+  surface: 'bg-zinc-800 bg-opacity-50',
+  surfaceSecondary: 'bg-zinc-700',
   text: 'text-gray-200',
   textSecondary: 'text-gray-400',
-  accent: 'text-blue-500',
-  accentHover: 'hover:text-blue-600',
+  accent: 'text-purple-400',
+  accentHover: 'hover:text-purple-300',
   error: 'text-red-500',
   warning: 'text-yellow-500',
   success: 'text-green-500',

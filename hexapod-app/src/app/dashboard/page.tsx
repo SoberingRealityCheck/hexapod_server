@@ -40,11 +40,11 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className={`min-h-screen ${theme.background}`}>
       <header className={`${theme.border} ${theme.borderSecondary}`}>
-        <div className="flex items-center p-4">
+        <div className="flex items-center justify-between p-4">
           <button 
-            className={`${theme.textSecondary} ${theme.accentHover} ${theme.transition}`}
+            className={`${theme.accent} ${theme.accentHover} ${theme.transition} font-semibold`}
             onClick={() => window.location.href = '/'}
           >
             ← Back to Home
@@ -53,37 +53,39 @@ export default function Dashboard() {
             <Image 
               src="/hexapod-logo.svg" 
               alt="Hexapod Logo" 
-              width={32} 
-              height={32} 
-              style={{ fill: 'gray-100', stroke: 'gray-100' }}
+              width={48} 
+              height={48} 
+              style={{ fill: `${theme.text}`, stroke: `${theme.text}`}}
             />
-            <h1 className="text-3xl font-bold text-gray-100">Hexapod Monitoring Dashboard</h1>
+            <h1 className={`text-4xl font-bold ${theme.text} text-center`}>
+              Totally Radical Hexapod Central Dashboard
+            </h1>
           </div>
         </div>
       </header>
       <main className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-400 mb-2">Camera Feed</h2>
+          <div className={`${theme.surface} p-4 rounded-lg border ${theme.border}`}>
+            <h2 className={`text-lg font-semibold ${theme.text} mb-2`}>what&apos;s it seeing?</h2>
             <CameraFeed />
           </div>
 
-          <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-400 mb-2">Status</h2>
+          <div className={`${theme.surface} p-4 rounded-lg border ${theme.border}`}>
+            <h2 className={`text-lg font-semibold ${theme.text} mb-2`}>how&apos;s it doing?</h2>
             <div className="space-y-4">
               <StatusIndicator online={robotState.online} />
               <BatteryIndicator level={robotState.batteryLevel} />
             </div>
           </div>
 
-          <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-400 mb-2">Location</h2>
+          <div className={`${theme.surface} p-4 rounded-lg border ${theme.border}`}>
+            <h2 className={`text-lg font-semibold ${theme.text} mb-2`}>where is it?</h2>
             <GPSMap location={robotState.gpsLocation} />
           </div>
         </div>
 
-        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 mt-4">
-          <h2 className="text-lg font-semibold text-gray-400 mb-2">Message Log</h2>
+        <div className={`${theme.surface} p-4 ${theme.borderRadius} ${theme.border} mt-4`}>
+          <h2 className={`text-lg font-semibold ${theme.text} mb-2`}>deep thoughts with hexapod.</h2>
           <MessageLog messages={robotState.messages} />
         </div>
       </main>
