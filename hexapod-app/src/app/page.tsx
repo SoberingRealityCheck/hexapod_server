@@ -24,7 +24,7 @@ export default function Home() {
           </ul>
           <p className="text-lg">
             I plan to update this in the future with more complex infortmation displays like realtime SLAM maps and path planning
-            once I get the base functionality I've outlined here operational. We shall see!
+            once I get the base functionality I&apos;ve outlined here operational. We shall see!
           </p>
           <div className="mt-8">
             <a
