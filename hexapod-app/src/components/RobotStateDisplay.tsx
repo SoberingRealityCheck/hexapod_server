@@ -22,7 +22,12 @@ export default function RobotStateDisplay() {
   useEffect(() => {
     const fetchState = async () => {
       try {
-        const response = await fetch(networkConfig.api.robotStateUrl);
+        const response = await fetch(networkConfig.api.robotStateUrl, {
+          headers: {
+            'Authorization': `Bearer ${networkConfig.api.apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

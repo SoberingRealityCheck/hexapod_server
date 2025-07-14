@@ -17,6 +17,7 @@ export const networkConfig = {
   api: {
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
     robotStateUrl: 'https://arachne-1.claysawesomewebsite.uk',
+    apiKey: process.env.NEXT_PUBLIC_API_KEY || '',
     timeout: 30000, // 30 seconds
   },
 
