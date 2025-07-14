@@ -11,6 +11,7 @@ import GPSMap from '@/components/GPSMap';
 import StatusIndicator from '@/components/StatusIndicator';
 import MessageLog from '@/components/MessageLog';
 import MusicPlayer from '@/components/MusicPlayer';
+import RobotStateDisplay from '@/components/RobotStateDisplay';
 
 export default function Dashboard() {
   const [robotState, setRobotState] = useState<RobotState>({
@@ -83,6 +84,10 @@ export default function Dashboard() {
             <h2 className={`text-lg font-semibold ${theme.text} mb-2`}>where is it?</h2>
             <GPSMap location={robotState.gpsLocation} />
           </div>
+        </div>
+
+        <div className={`${theme.surface} p-4 ${theme.borderRadius} ${theme.border} mt-4`}>
+          <RobotStateDisplay />
         </div>
 
         <div className={`${theme.surface} p-4 ${theme.borderRadius} ${theme.border} mt-4`}>
