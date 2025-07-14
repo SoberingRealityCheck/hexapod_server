@@ -10,7 +10,7 @@ import BatteryIndicator from '@/components/BatteryIndicator';
 import GPSMap from '@/components/GPSMap';
 import StatusIndicator from '@/components/StatusIndicator';
 import MessageLog from '@/components/MessageLog';
-
+import MusicPlayer from '@/components/MusicPlayer';
 
 export default function Dashboard() {
   const [robotState, setRobotState] = useState<RobotState>({
@@ -40,7 +40,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className={`min-h-screen ${theme.background}`}>
+    <div className={`min-h-screen flex flex-col ${theme.background}`}>
       <header className={`${theme.border} ${theme.borderSecondary}`}>
         <div className="flex items-center justify-between p-4">
           <button 
@@ -63,6 +63,7 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+      <MusicPlayer />
       <main className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className={`${theme.surface} p-4 rounded-lg border ${theme.border}`}>

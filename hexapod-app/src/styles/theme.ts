@@ -4,6 +4,8 @@ export function useTheme() {
   return theme;
 }
 
+import '@/styles/courier-prime.css';
+
 export const theme = {
   // Next.js minimal dark theme
   background: 'bg-black',
@@ -22,7 +24,7 @@ export const theme = {
   borderRadius: 'rounded-lg',
   borderRadiusLarge: 'rounded-xl',
   transition: 'transition-colors duration-200',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  fontFamily: 'font-family: var(--font-family)',
   // Modern button colors
   buttonPrimary: 'bg-purple-500',
   buttonPrimaryHover: 'hover:bg-purple-600',

@@ -1,0 +1,35 @@
+@font-face {
+  font-family: 'Courier Prime';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/CourierPrime-Regular.woff2') format('woff2'),
+       url('/fonts/CourierPrime-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Courier Prime';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/CourierPrime-Bold.woff2') format('woff2'),
+       url('/fonts/CourierPrime-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Courier Prime';
+  font-style: italic;
+  font-weight: 400;
+  src: url('/fonts/CourierPrime-Italic.woff2') format('woff2'),
+       url('/fonts/CourierPrime-Italic.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Courier Prime';
+  font-style: italic;
+  font-weight: 700;
+  src: url('/fonts/CourierPrime-BoldItalic.woff2') format('woff2'),
+       url('/fonts/CourierPrime-BoldItalic.woff') format('woff');
+}
+
+:root {
+  --font-family: 'Courier Prime', monospace;
+}
