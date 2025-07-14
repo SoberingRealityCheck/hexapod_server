@@ -20,7 +20,7 @@
 	},
 	"routes": [
 		{
-		  "pattern": "hexapod.claysawesomewebsite.uk/*",
+		  "pattern": "arachne-1.claysawesomewebsite.uk/*",
 		  "zone_name": "claysawesomewebsite.uk"
 		}
 	  ]
