@@ -3,9 +3,9 @@ import Image from 'next/image';
 
 const PLAYLIST = [
   '/audio/mainframe.mp3',
-  '/audio/squirrel song v2.mp3',
+  '/audio/squirrel_song.mp3',
   '/audio/the_system.mp3',
-  '/audio/above the clouds.mp3',
+  '/audio/above_clouds.mp3',
 ];
 
 export default function MusicPlayer() {
