@@ -82,23 +82,22 @@ export default function RobotStateDisplay() {
             setError(`Error: ${error instanceof Error ? error.message : 'Failed to fetch robot state'}`);
           }
         }
-      } catch (err) {
+      } catch (error: unknown) {
         console.error('Error details:', {
-          error: err,
-          message: err?.message,
-          stack: err?.stack,
-          type: err instanceof Error ? 'Error' : 'Unknown'
+          error,
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          type: error instanceof Error ? 'Error' : 'Unknown'
         });
         
         // Handle specific error cases
-        if (err instanceof TypeError && err.message.includes('NetworkError')) {
+        if (error instanceof TypeError && error.message.includes('NetworkError')) {
           setError('Network error: Could not connect to server. Check your internet connection and try again.');
-        } else if (err instanceof TypeError && err.message.includes('CORS')) {
-          setError('CORS error: The server is not configured to accept requests from this origin. Please check your server configuration.');
+        } else if (error instanceof Error && error.message.includes('404')) {
+          setError('Not Found: The requested resource does not exist');
         } else {
-          setError(err instanceof Error ? err.message : 'Failed to fetch robot state');
+          setError(`Error: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
         }
-        setError(err instanceof Error ? err.message : 'Failed to fetch robot state');
       }
     };
 
