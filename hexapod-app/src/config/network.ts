@@ -19,19 +19,9 @@ export const networkConfig = {
 
   // API Configuration
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-    robotStateUrl: 'https://arachne-1.claysawesomewebsite.uk/api/robot-state',
-    apiKey: process.env.NEXT_PUBLIC_API_KEY || env.NEXT_PUBLIC_API_KEY,
-    // Log API key (redacted for security)
-    _apiKeyDebug: process.env.NEXT_PUBLIC_API_KEY ? 'API key loaded from NEXT_PUBLIC_API_KEY' : 
-                    env.NEXT_PUBLIC_API_KEY ? 'API key loaded from env.NEXT_PUBLIC_API_KEY' : 
-                    'No API key configured',
+    baseUrl: process.env.HEXAPOD_API_URL,
+    robotStateUrl: `${process.env.HEXAPOD_API_URL}/robot-state`,
     timeout: 30000, // 30 seconds
-    cors: {
-      origin: process.env.NEXT_PUBLIC_API_CORS_ORIGIN || '*',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      headers: ['Content-Type', 'Authorization', 'X-API-Key']
-    }
   },
 
   // WebSocket Configuration
