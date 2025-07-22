@@ -40,6 +40,9 @@ export default function RobotStateDisplay() {
         console.log('Response status:', response.status);
         console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
+        // Clone the response for potential error handling
+        const responseClone = response.clone();
+        
         try {
           // First check if we get a valid JSON response
           const contentType = response.headers.get('content-type') || '';
@@ -50,7 +53,7 @@ export default function RobotStateDisplay() {
             console.error('Non-JSON response received:', text.substring(0, 200) + (text.length > 200 ? '...' : ''));
             throw new Error('Server returned non-JSON response');
           }
-
+          
           const data = await response.json();
           console.log('Response data:', data);
           
@@ -67,7 +70,8 @@ export default function RobotStateDisplay() {
 
           setRobotState(data as RobotState);
         } catch (error) {
-          const responseText = await response.text();
+          // Use the cloned response for error logging
+          const responseText = await responseClone.text();
           console.error('Response details:', {
             status: response.status,
             headers: Object.fromEntries(response.headers.entries()),
