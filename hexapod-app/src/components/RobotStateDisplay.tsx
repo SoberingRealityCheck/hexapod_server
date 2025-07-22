@@ -52,17 +52,48 @@ export default function RobotStateDisplay() {
         console.log('Response status:', response.status);
         console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-        }
+        try {
+          // First check if we get a valid JSON response
+          const contentType = response.headers.get('content-type') || '';
+          console.log('Response Content-Type:', contentType);
 
-        const data = await response.json();
-        console.log('Response data:', data);
-        if (!data || typeof data !== 'object') {
-          throw new Error('Invalid response format');
+          if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response received:', text.substring(0, 200) + (text.length > 200 ? '...' : ''));
+            throw new Error('Server returned non-JSON response');
+          }
+
+          const data = await response.json();
+          console.log('Response data:', data);
+          
+          // Validate the response shape
+          if (typeof data !== 'object' || data === null) {
+            throw new Error('Invalid response format: Expected a JSON object');
+          }
+
+          // Check if we have all required fields
+          if (!('online' in data) || !('batteryLevel' in data) || !('gpsLocation' in data)) {
+            console.error('Missing required fields in response:', data);
+            throw new Error('Invalid response format: Missing required fields');
+          }
+
+          setRobotState(data as RobotState);
+        } catch (error) {
+          const responseText = await response.text();
+          console.error('Response details:', {
+            status: response.status,
+            headers: Object.fromEntries(response.headers.entries()),
+            body: responseText.substring(0, 200) + (responseText.length > 200 ? '...' : '')
+          });
+          
+          if (response.status === 401) {
+            setError('Unauthorized: Invalid API key');
+          } else if (response.status === 404) {
+            setError('Not Found: The requested resource does not exist');
+          } else {
+            setError(`Error: ${error instanceof Error ? error.message : 'Failed to fetch robot state'}`);
+          }
         }
-        setRobotState(data as RobotState);
       } catch (err) {
         console.error('Error details:', {
           error: err,
