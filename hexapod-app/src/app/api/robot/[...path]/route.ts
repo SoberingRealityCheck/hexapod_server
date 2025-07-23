@@ -3,9 +3,15 @@ import { networkConfig } from '@/config/network';
 
 export const dynamic = 'force-dynamic';
 
+interface RouteParams {
+  params: {
+    path: string[];
+  };
+}
+
 export async function GET(
   request: Request,
-  { params }: { params: { path: string[] } }
+  { params }: RouteParams
 ) {
   const path = params.path?.join('/') || '';
   const targetUrl = `${networkConfig.api.baseUrl}/${path}`;
