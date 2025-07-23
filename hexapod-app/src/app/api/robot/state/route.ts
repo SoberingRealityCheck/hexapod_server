@@ -4,19 +4,9 @@ import { networkConfig } from '@/config/network';
 
 export const dynamic = 'force-dynamic';
 
-type RouteParams = {
-  params: {
-    path: string[];
-  };
-};
-
-export async function GET(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(request: NextRequest) {
   try {
-    const path = params.path?.join('/') || '';
-    const targetUrl = `${networkConfig.api.baseUrl}/${path}`.replace(/([^:]\/)\/+/g, '$1'); // Remove double slashes
+    const targetUrl = `${networkConfig.api.baseUrl}/robot-state`;
     
     console.log(`Proxying request to: ${targetUrl}`);
     
@@ -31,16 +21,12 @@ export async function GET(
     const data = await response.text();
     
     try {
-      // Try to parse as JSON, if it fails, return as text
       const json = JSON.parse(data);
       return NextResponse.json(json, { status: response.status });
     } catch {
-      // If not JSON, return as text
       return new NextResponse(data, {
         status: response.status,
-        headers: {
-          'Content-Type': 'text/plain',
-        },
+        headers: { 'Content-Type': 'text/plain' },
       });
     }
   } catch (error) {

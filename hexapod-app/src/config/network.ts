@@ -33,7 +33,7 @@ export const networkConfig = {
         return `${this.baseUrl}/api/robot-state`;
       }
       // Client-side: use relative URL to proxy
-      return '/api/robot/robot-state';
+      return '/api/robot/state';
     },
     
     // Timeout for API requests (in milliseconds)
