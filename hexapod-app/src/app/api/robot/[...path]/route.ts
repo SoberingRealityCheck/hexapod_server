@@ -1,15 +1,22 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { networkConfig } from '@/config/network';
 
 export const dynamic = 'force-dynamic';
 
+type RouteParams = {
+  params: {
+    path: string[];
+  };
+};
+
 export async function GET(
-  request: Request,
-  context: { params: { path: string[] } }
+  request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
-    const path = context.params?.path?.join('/') || '';
-    const targetUrl = `${networkConfig.api.baseUrl}/${path}`;
+    const path = params.path?.join('/') || '';
+    const targetUrl = `${networkConfig.api.baseUrl}/${path}`.replace(/([^:]\/)\/+/g, '$1'); // Remove double slashes
     
     console.log(`Proxying request to: ${targetUrl}`);
     
