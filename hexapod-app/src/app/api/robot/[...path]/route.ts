@@ -1,20 +1,18 @@
 import { NextResponse } from 'next/server';
 import { networkConfig } from '@/config/network';
-import type { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
+  request: Request,
+  context: { params: { path: string[] } }
 ) {
-  const path = params.path?.join('/') || '';
-  const targetUrl = `${networkConfig.api.baseUrl}/${path}`;
-  
-  console.log(`Proxying request to: ${targetUrl}`);
-  
   try {
-    // Forward the request to the actual API
+    const path = context.params?.path?.join('/') || '';
+    const targetUrl = `${networkConfig.api.baseUrl}/${path}`;
+    
+    console.log(`Proxying request to: ${targetUrl}`);
+    
     const response = await fetch(targetUrl, {
       method: 'GET',
       headers: {
@@ -23,18 +21,15 @@ export async function GET(
       cache: 'no-store',
     });
 
-    // Clone the response to read it multiple times if needed
-    const responseClone = response.clone();
+    const data = await response.text();
     
     try {
-      // Try to get the response as JSON
-      const data = await response.json();
-      return NextResponse.json(data, { status: response.status });
-    } catch (jsonError) {
-      // If JSON parsing fails, try to get the response as text
-      console.log('Failed to parse JSON, trying text:', jsonError);
-      const text = await responseClone.text();
-      return new NextResponse(text, {
+      // Try to parse as JSON, if it fails, return as text
+      const json = JSON.parse(data);
+      return NextResponse.json(json, { status: response.status });
+    } catch {
+      // If not JSON, return as text
+      return new NextResponse(data, {
         status: response.status,
         headers: {
           'Content-Type': 'text/plain',
@@ -42,17 +37,11 @@ export async function GET(
       });
     }
   } catch (error) {
-    console.error('Proxy error details:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      targetUrl,
-    });
-    
+    console.error('Proxy error:', error);
     return NextResponse.json(
       { 
         error: 'Failed to proxy request',
         details: error instanceof Error ? error.message : String(error),
-        targetUrl,
       },
       { status: 500 }
     );
