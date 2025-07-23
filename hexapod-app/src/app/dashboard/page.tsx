@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 import Image from 'next/image';
 import { theme } from '@/styles/theme';
 import { RobotState } from '@/lib/robot-state';
+import { networkConfig } from '@/config/network';
 import CameraFeed from '@/components/CameraFeed';
 import BatteryIndicator from '@/components/BatteryIndicator';
 import GPSMap from '@/components/GPSMap';
@@ -25,17 +26,35 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const socket = io('YOUR_CLOUDFLARE_URL');
+    // Only initialize WebSocket if the URL is properly configured
+    if (!networkConfig.websocket.url || networkConfig.websocket.url.includes('YOUR_')) {
+      console.warn('WebSocket URL not properly configured. Please set NEXT_PUBLIC_WS_URL in your environment variables.');
+      return;
+    }
+
+    console.log('Connecting to WebSocket:', networkConfig.websocket.url);
+    const socket = io(networkConfig.websocket.url, {
+      reconnectionAttempts: networkConfig.websocket.reconnectAttempts,
+      reconnectionDelay: networkConfig.websocket.reconnectDelay,
+      autoConnect: true,
+      transports: ['websocket'],
+    });
     
     socket.on('connect', () => {
-      console.log('Connected to robot state');
+      console.log('Connected to robot state via WebSocket');
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
     });
 
     socket.on('stateUpdate', (state: RobotState) => {
+      console.log('Received state update:', state);
       setRobotState(state);
     });
 
     return () => {
+      console.log('Disconnecting WebSocket');
       socket.disconnect();
     };
   }, []);

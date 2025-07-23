@@ -15,114 +15,203 @@ interface RobotState {
   // Add other state properties as needed
 }
 
+// Default robot state values
+const defaultRobotState: RobotState = {
+  online: false,
+  batteryLevel: 0,
+  gpsLocation: {
+    latitude: 0,
+    longitude: 0
+  },
+  messages: ['Connecting to robot...']
+};
+
 export default function RobotStateDisplay() {
-  const [robotState, setRobotState] = useState<RobotState | null>(null);
+  const [robotState, setRobotState] = useState<RobotState>(defaultRobotState);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('RobotStateDisplay mounting/Updating...');
     console.log('API endpoint:', networkConfig.api.robotStateUrl);
 
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 2; // Maximum number of retry attempts
+    const retryDelay = 3000; // Initial delay of 3 seconds
+    let retryTimeout: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
+
+    // Function to handle retry with exponential backoff
+    const scheduleRetry = (errorMessage: string) => {
+      if (!isMounted || retryCount >= maxRetries) {
+        console.error('Max retries reached. Giving up.');
+        setError(`Connection failed: ${errorMessage}. Using offline mode.`);
+        setIsLoading(false);
+        return;
+      }
+
+      const delay = retryDelay * Math.pow(2, retryCount);
+      console.log(`Retry ${retryCount + 1}/${maxRetries} in ${delay}ms...`);
+      
+      retryTimeout = setTimeout(() => {
+        if (isMounted) {
+          fetchState();
+        }
+      }, delay);
+      
+      retryCount++;
+    };
+
     const fetchState = async () => {
+      if (!isMounted) return;
+      
       try {
         console.log('Fetching robot state...');
         console.log('Request URL:', networkConfig.api.robotStateUrl);
 
-        const response = await fetch(networkConfig.api.robotStateUrl, {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-        // Clone the response for potential error handling
-        const responseClone = response.clone();
-        
         try {
-          // First check if we get a valid JSON response
-          const contentType = response.headers.get('content-type') || '';
-          console.log('Response Content-Type:', contentType);
-
-          if (!contentType.includes('application/json')) {
-            const text = await response.text();
-            console.error('Non-JSON response received:', text.substring(0, 200) + (text.length > 200 ? '...' : ''));
-            throw new Error('Server returned non-JSON response');
+          // First try without credentials
+          let response;
+          try {
+            response = await fetch(networkConfig.api.robotStateUrl, {
+              method: 'GET',
+              mode: 'cors',
+              credentials: 'omit', // First try without credentials
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              signal: controller.signal,
+              cache: 'no-cache',
+              redirect: 'follow',
+              referrerPolicy: 'no-referrer'
+            });
+          } catch (error) {
+            // If first attempt fails, try with credentials if this is a CORS error
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+              console.log('Initial CORS attempt failed, trying with credentials...');
+              response = await fetch(networkConfig.api.robotStateUrl, {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                signal: controller.signal,
+                cache: 'no-cache',
+                redirect: 'follow',
+                referrerPolicy: 'no-referrer'
+              });
+            } else {
+              throw error; // Re-throw if it's not a CORS error
+            }
           }
+
+          // Check if the response is OK (status 200-299)
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+          }
+
+          clearTimeout(timeoutId);
+          console.log('Response status:', response.status);
+
+          // Reset retry count and start polling on successful response
+          retryCount = 0;
+          if (isMounted) {
+            startPolling();
+          }
+
+          // Clone the response for error handling
+          const responseClone = response.clone();
           
-          const data = await response.json();
-          console.log('Response data:', data);
-          
-          // Validate the response shape
-          if (typeof data !== 'object' || data === null) {
-            throw new Error('Invalid response format: Expected a JSON object');
+          try {
+            const data = await response.json() as Partial<RobotState>;
+            if (isMounted) {
+              const newState: RobotState = {
+                online: data.online ?? defaultRobotState.online,
+                batteryLevel: data.batteryLevel ?? defaultRobotState.batteryLevel,
+                messages: data.messages ?? defaultRobotState.messages,
+                gpsLocation: {
+                  latitude: data.gpsLocation?.latitude ?? defaultRobotState.gpsLocation.latitude,
+                  longitude: data.gpsLocation?.longitude ?? defaultRobotState.gpsLocation.longitude,
+                },
+                // Add any other fields from RobotState here
+              };
+              setRobotState(newState);
+              setError(null);
+              setIsLoading(false);
+            }
+          } catch (parseError) {
+            const responseText = await responseClone.text();
+            console.error('Failed to parse response:', {
+              status: response.status,
+              headers: Object.fromEntries(response.headers.entries()),
+              body: responseText.substring(0, 200) + (responseText.length > 200 ? '...' : '')
+            });
+            throw new Error('Failed to parse server response');
           }
-
-          // Check if we have all required fields
-          if (!('online' in data) || !('batteryLevel' in data) || !('gpsLocation' in data)) {
-            console.error('Missing required fields in response:', data);
-            throw new Error('Invalid response format: Missing required fields');
-          }
-
-          setRobotState(data as RobotState);
         } catch (error) {
-          // Use the cloned response for error logging
-          const responseText = await responseClone.text();
-          console.error('Response details:', {
-            status: response.status,
-            headers: Object.fromEntries(response.headers.entries()),
-            body: responseText.substring(0, 200) + (responseText.length > 200 ? '...' : '')
-          });
-          
-          if (response.status === 401) {
-            setError('Unauthorized: Invalid API key');
-          } else if (response.status === 404) {
-            setError('Not Found: The requested resource does not exist');
-          } else {
-            setError(`Error: ${error instanceof Error ? error.message : 'Failed to fetch robot state'}`);
-          }
+          clearTimeout(timeoutId);
+          throw error;
         }
-      } catch (error: unknown) {
-        console.error('Error details:', {
-          error,
-          message: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined,
-          type: error instanceof Error ? 'Error' : 'Unknown'
-        });
-        
-        // Handle specific error cases
-        if (error instanceof TypeError && error.message.includes('NetworkError')) {
-          setError('Network error: Could not connect to server. Check your internet connection and try again.');
-        } else if (error instanceof Error && error.message.includes('404')) {
-          setError('Not Found: The requested resource does not exist');
-        } else {
-          setError(`Error: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
+      } catch (error) {
+        console.error('Fetch error:', error);
+        if (isMounted) {
+          setError(`Error: ${error instanceof Error ? error.message : 'Connection error'}`);
+          
+          // Schedule a retry with exponential backoff
+          const errorMessage = error instanceof Error ? error.message : 'Connection failed';
+          scheduleRetry(errorMessage);
         }
       }
     };
 
     // Fetch initial state
+    // Initial fetch
     fetchState();
 
-    // Poll every 5 seconds
-    const interval = setInterval(fetchState, 5000);
+    // Set up polling only after successful initial connection
+    const startPolling = () => {
+      if (!isMounted) return;
+      // Clear any existing interval
+      if (pollInterval) clearInterval(pollInterval);
+      // Start polling every 10 seconds
+      pollInterval = setInterval(fetchState, 10000);
+    };
 
-    return () => clearInterval(interval);
-  });
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (pollInterval) clearInterval(pollInterval);
+      if (retryTimeout) clearTimeout(retryTimeout);
+    };
+  }, []);
 
   if (error) {
     return (
-      <div className={`${theme.surface} p-4 rounded-lg border ${theme.border} text-red-500`}>{error}</div>
+      <div className={`${theme.surface} p-4 rounded-lg border ${theme.border} space-y-2`}>
+        <div className="text-red-500 font-medium">Connection Error</div>
+        <div className="text-sm text-gray-400">{error}</div>
+        <div className="text-sm text-gray-500">Showing last known state:</div>
+      </div>
     );
   }
 
-  if (!robotState) {
+  if (isLoading) {
     return (
-      <div className={`${theme.surface} p-4 rounded-lg border ${theme.border} text-gray-400`}>Loading robot state...</div>
+      <div className={`${theme.surface} p-4 rounded-lg border ${theme.border} text-gray-400`}>
+        <div className="animate-pulse space-y-2">
+          <div>Connecting to robot...</div>
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
     );
   }
 

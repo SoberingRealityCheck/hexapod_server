@@ -19,9 +19,25 @@ export const networkConfig = {
 
   // API Configuration
   api: {
-    baseUrl: process.env.HEXAPOD_API_URL,
-    robotStateUrl: `${process.env.HEXAPOD_API_URL}/robot-state`,
-    timeout: 30000, // 30 seconds
+    // Base URL for the actual backend API
+    baseUrl: (() => {
+      const envUrl = process.env.NEXT_PUBLIC_HEXAPOD_API_URL || process.env.HEXAPOD_API_URL || 'http://localhost:3000';
+      // Remove trailing slashes
+      return envUrl.replace(/\/+$/, '');
+    })(),
+    
+    // URL for the robot state endpoint (will be proxied through Next.js API route)
+    get robotStateUrl() {
+      if (typeof window === 'undefined') {
+        // Server-side: use direct URL
+        return `${this.baseUrl}/api/robot-state`;
+      }
+      // Client-side: use relative URL to proxy
+      return '/api/robot/robot-state';
+    },
+    
+    // Timeout for API requests (in milliseconds)
+    timeout: 10000, // 10 seconds
   },
 
   // WebSocket Configuration
