@@ -1,17 +1,12 @@
 import { NextResponse } from 'next/server';
 import { networkConfig } from '@/config/network';
+import type { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-interface RouteParams {
-  params: {
-    path: string[];
-  };
-}
-
 export async function GET(
-  request: Request,
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
 ) {
   const path = params.path?.join('/') || '';
   const targetUrl = `${networkConfig.api.baseUrl}/${path}`;
@@ -37,10 +32,8 @@ export async function GET(
       return NextResponse.json(data, { status: response.status });
     } catch (jsonError) {
       // If JSON parsing fails, try to get the response as text
-      console.log('JSON parse error, trying as text...');
+      console.log('Failed to parse JSON, trying text:', jsonError);
       const text = await responseClone.text();
-      console.log('Raw response:', text);
-      
       return new NextResponse(text, {
         status: response.status,
         headers: {
